@@ -16,5 +16,8 @@ class Settings(BaseSettings):
     bob_cooldown_ms: int = 300
     lock_idle_sec: float = 1.0
 
+    mediapipe_model_path: str = "models/hand_landmarker.task"
+    mediapipe_auto_download_model: bool = True
+
 
 settings = Settings()

@@ -1,6 +1,6 @@
 # Rock Paper Scissors Robot (Web + MediaPipe + Raspberry Pi)
 
-A browser-based Rock Paper Scissors game using a USB webcam, MediaPipe Hands, and OpenCV.
+A browser-based Rock Paper Scissors game using a USB webcam, **MediaPipe Tasks API (Hand Landmarker)**, and OpenCV.
 It is designed for Raspberry Pi 5 and remote access from Windows using SSH port forwarding.
 
 ## Features
@@ -9,7 +9,7 @@ It is designed for Raspberry Pi 5 and remote access from Windows using SSH port 
   - `GET /` UI page
   - `GET /stream` MJPEG live video stream with landmark overlay
   - `WS /ws` real-time game state updates
-- Hand tracking with MediaPipe Hands
+- Hand tracking with MediaPipe **Tasks API** Hand Landmarker
 - Fist detection heuristic for robust rock/start gesture
 - Motion-based **bob detection** (down→up) with smoothing + debouncing
 - Selection cycle logic:
@@ -49,7 +49,7 @@ requirements.txt
 bash scripts/pi_install.sh
 ```
 
-This script updates apt, installs build/runtime dependencies, creates `.venv`, and installs Python deps.
+This script updates apt, installs build/runtime dependencies, creates `.venv`, installs Python deps, and downloads the Hand Landmarker model file.
 
 ## Run on Raspberry Pi
 
@@ -94,12 +94,14 @@ You can also view from LAN directly if server binds to `0.0.0.0` and firewall al
 - `BOB_THRESHOLD_PX=35`
 - `BOB_COOLDOWN_MS=300`
 - `LOCK_IDLE_SEC=1.0`
+- `MEDIAPIPE_MODEL_PATH=models/hand_landmarker.task`
+- `MEDIAPIPE_AUTO_DOWNLOAD_MODEL=true`
 
 ## Troubleshooting
 
 - If camera fails, UI shows *Camera not available* and logs include device tips.
 - Verify webcam exists as `/dev/video0` (or set `OPENCV_DEVICE`).
-- On Pi, if MediaPipe wheel install is problematic, ensure system and pip are updated.
+- Ensure the model file exists at `MEDIAPIPE_MODEL_PATH`; install script downloads it.
 
 ## Development
 

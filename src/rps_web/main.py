@@ -36,7 +36,7 @@ app.mount("/static", StaticFiles(directory=str(WEB_DIR / "static")), name="stati
 class AppRuntime:
     def __init__(self) -> None:
         self.camera = OpenCVCamera(settings.opencv_device, settings.width, settings.height, settings.fps)
-        self.tracker = HandTracker()
+        self.tracker = HandTracker(settings.mediapipe_model_path, settings.mediapipe_auto_download_model)
         self.engine = GameEngine(BobDetector(settings.bob_threshold_px, settings.bob_cooldown_ms), settings.lock_idle_sec)
         self.annotated_frame: Optional[bytes] = None
         self.frame_lock = threading.Lock()

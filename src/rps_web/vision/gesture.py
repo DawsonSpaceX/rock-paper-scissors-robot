@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
-
 import math
-import mediapipe as mp
+from typing import Any
 
 
 def _dist(a: Any, b: Any) -> float:
@@ -11,25 +9,29 @@ def _dist(a: Any, b: Any) -> float:
 
 
 def is_fist(landmarks: Any) -> bool:
-    if landmarks is None:
+    if not landmarks:
         return False
 
-    lms = landmarks.landmark
-    hand = mp.solutions.hands.HandLandmark
-    wrist = lms[hand.WRIST]
+    # MediaPipe Tasks API landmark indices
+    WRIST = 0
+    INDEX_MCP, INDEX_PIP, INDEX_TIP = 5, 6, 8
+    MIDDLE_MCP, MIDDLE_PIP, MIDDLE_TIP = 9, 10, 12
+    RING_MCP, RING_PIP, RING_TIP = 13, 14, 16
+    PINKY_MCP, PINKY_PIP, PINKY_TIP = 17, 18, 20
 
+    wrist = landmarks[WRIST]
     fingers = [
-        (hand.INDEX_FINGER_MCP, hand.INDEX_FINGER_PIP, hand.INDEX_FINGER_TIP),
-        (hand.MIDDLE_FINGER_MCP, hand.MIDDLE_FINGER_PIP, hand.MIDDLE_FINGER_TIP),
-        (hand.RING_FINGER_MCP, hand.RING_FINGER_PIP, hand.RING_FINGER_TIP),
-        (hand.PINKY_MCP, hand.PINKY_PIP, hand.PINKY_TIP),
+        (INDEX_MCP, INDEX_PIP, INDEX_TIP),
+        (MIDDLE_MCP, MIDDLE_PIP, MIDDLE_TIP),
+        (RING_MCP, RING_PIP, RING_TIP),
+        (PINKY_MCP, PINKY_PIP, PINKY_TIP),
     ]
 
     curled = 0
     for mcp_i, pip_i, tip_i in fingers:
-        mcp = lms[mcp_i]
-        pip = lms[pip_i]
-        tip = lms[tip_i]
+        mcp = landmarks[mcp_i]
+        pip = landmarks[pip_i]
+        tip = landmarks[tip_i]
         y_curled = tip.y > pip.y
         d_curled = _dist(tip, wrist) < _dist(mcp, wrist) * 1.05
         if y_curled or d_curled:
