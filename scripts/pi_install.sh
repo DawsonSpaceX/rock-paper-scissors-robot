@@ -2,7 +2,7 @@
 set -euo pipefail
 
 sudo apt update
-sudo apt install -y python3-venv python3-pip build-essential libgl1 libglib2.0-0 libopencv-dev curl
+sudo apt install -y python3-venv python3-pip build-essential libgl1 libglib2.0-0 curl
 
 python3 -m venv .venv
 source .venv/bin/activate
