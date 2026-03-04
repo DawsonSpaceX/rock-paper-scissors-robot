@@ -86,7 +86,15 @@ class HandTracker:
             min_hand_presence_confidence=0.6,
             min_tracking_confidence=0.6,
         )
-        self.landmarker = vision.HandLandmarker.create_from_options(options)
+        try:
+            self.landmarker = vision.HandLandmarker.create_from_options(options)
+        except OSError as exc:
+            if "isSupportedConfiguration" in str(exc):
+                raise RuntimeError(
+                    "MediaPipe failed to load native libraries. On Raspberry Pi, this is often a Python/OpenCV ABI mismatch. "
+                    "Recreate the venv with python3.11 and reinstall requirements."
+                ) from exc
+            raise
 
     def process(self, frame_bgr: np.ndarray) -> HandDetection:
         h, _, _ = frame_bgr.shape

@@ -39,6 +39,7 @@ src/rps_web/
   web/static/app.js
   web/static/style.css
 scripts/pi_install.sh
+scripts/pi_debug_run.sh
 requirements.txt
 .env.example
 ```
@@ -49,7 +50,7 @@ requirements.txt
 bash scripts/pi_install.sh
 ```
 
-This script updates apt, installs build/runtime dependencies, creates `.venv`, installs Python deps, and downloads the Hand Landmarker model file.
+This script updates apt, installs build/runtime dependencies, creates `.venv` (prefers `python3.11` when available), installs Python deps, and downloads the Hand Landmarker model file.
 
 ## Run on Raspberry Pi
 
@@ -64,6 +65,27 @@ bash scripts/pi_install.sh
 cp -n .env.example .env
 source .venv/bin/activate
 PYTHONPATH=src python -m rps_web.main --host 0.0.0.0 --port 8000
+```
+
+## SSH copy/paste quick start (Raspberry Pi)
+
+Use this exact block in your SSH session:
+
+```bash
+cd ~/Documents/rock-paper-scissors-robot
+git checkout main
+git pull
+bash scripts/pi_install.sh
+cp -n .env.example .env
+source .venv/bin/activate
+PYTHONPATH=src python -m rps_web.main --host 0.0.0.0 --port 8000
+```
+
+If startup fails, run this one-command diagnostics script and paste all output back here:
+
+```bash
+cd ~/Documents/rock-paper-scissors-robot
+bash scripts/pi_debug_run.sh
 ```
 
 ## Access from Windows via SSH tunnel
@@ -116,7 +138,7 @@ You can also view from LAN directly if server binds to `0.0.0.0` and firewall al
   OSError: .../mediapipe/tasks/c/libmediapipe.so: undefined symbol: _ZN12carotene_o4t24isSupportedConfigurationEv
   ```
 
-  do a clean reinstall with system OpenCV dev packages removed (they can conflict with the Python wheel MediaPipe expects):
+  do a clean reinstall with system OpenCV dev packages removed (they can conflict with the Python wheel MediaPipe expects). Copy/paste this block:
 
   ```bash
   cd ~/Documents/rock-paper-scissors-robot
@@ -129,7 +151,17 @@ You can also view from LAN directly if server binds to `0.0.0.0` and firewall al
   PYTHONPATH=src python -m rps_web.main --host 0.0.0.0 --port 8000
   ```
 
-- If it still fails on Raspberry Pi OS with Python 3.12, use a Python 3.11 virtualenv for this project, then reinstall requirements and run again.
+- If it still fails, install Python 3.11 and rebuild the virtualenv with it:
+
+  ```bash
+  sudo apt install -y python3.11 python3.11-venv
+  rm -rf .venv
+  python3.11 -m venv .venv
+  source .venv/bin/activate
+  pip install --upgrade pip
+  pip install -r requirements.txt
+  PYTHONPATH=src python -m rps_web.main --host 0.0.0.0 --port 8000
+  ```
 
 ## Development
 
