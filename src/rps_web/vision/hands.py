@@ -12,9 +12,46 @@ import numpy as np
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
+try:
+    from mediapipe.python.solutions.hands_connections import (
+        HAND_CONNECTIONS as MP_HAND_CONNECTIONS,
+    )
+except ImportError:
+    MP_HAND_CONNECTIONS = None
+
 logger = logging.getLogger(__name__)
 
-HAND_CONNECTIONS = list(mp.solutions.hands.HAND_CONNECTIONS)
+_FALLBACK_HAND_CONNECTIONS = [
+    (0, 1),
+    (1, 2),
+    (2, 3),
+    (3, 4),
+    (0, 5),
+    (5, 6),
+    (6, 7),
+    (7, 8),
+    (5, 9),
+    (9, 10),
+    (10, 11),
+    (11, 12),
+    (9, 13),
+    (13, 14),
+    (14, 15),
+    (15, 16),
+    (13, 17),
+    (0, 17),
+    (17, 18),
+    (18, 19),
+    (19, 20),
+]
+
+if MP_HAND_CONNECTIONS is None:
+    HAND_CONNECTIONS = _FALLBACK_HAND_CONNECTIONS
+    logger.info("Using fallback MediaPipe hand connections topology")
+else:
+    HAND_CONNECTIONS = list(MP_HAND_CONNECTIONS)
+    logger.info("Using canonical MediaPipe hand connections topology")
+
 MODEL_URL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task"
 
 
@@ -49,7 +86,15 @@ class HandTracker:
             min_hand_presence_confidence=0.6,
             min_tracking_confidence=0.6,
         )
-        self.landmarker = vision.HandLandmarker.create_from_options(options)
+        try:
+            self.landmarker = vision.HandLandmarker.create_from_options(options)
+        except OSError as exc:
+            if "isSupportedConfiguration" in str(exc):
+                raise RuntimeError(
+                    "MediaPipe failed to load native libraries. On Raspberry Pi, this is often a Python/OpenCV ABI mismatch. "
+                    "Recreate the venv with python3.11 and reinstall requirements."
+                ) from exc
+            raise
 
     def process(self, frame_bgr: np.ndarray) -> HandDetection:
         h, _, _ = frame_bgr.shape
@@ -73,9 +118,9 @@ class HandTracker:
             y = int(point.y * h)
             cv2.circle(frame_bgr, (x, y), 3, (0, 255, 0), -1)
 
-        for conn in HAND_CONNECTIONS:
-            p1 = landmarks[conn[0]]
-            p2 = landmarks[conn[1]]
+        for start_idx, end_idx in HAND_CONNECTIONS:
+            p1 = landmarks[start_idx]
+            p2 = landmarks[end_idx]
             x1, y1 = int(p1.x * w), int(p1.y * h)
             x2, y2 = int(p2.x * w), int(p2.y * h)
             cv2.line(frame_bgr, (x1, y1), (x2, y2), (255, 200, 0), 2)

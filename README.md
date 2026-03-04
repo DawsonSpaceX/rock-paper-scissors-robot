@@ -39,6 +39,7 @@ src/rps_web/
   web/static/app.js
   web/static/style.css
 scripts/pi_install.sh
+scripts/pi_debug_run.sh
 requirements.txt
 .env.example
 ```
@@ -49,14 +50,42 @@ requirements.txt
 bash scripts/pi_install.sh
 ```
 
-This script updates apt, installs build/runtime dependencies, creates `.venv`, installs Python deps, and downloads the Hand Landmarker model file.
+This script updates apt, installs build/runtime dependencies, creates `.venv` (prefers `python3.11` when available), installs Python deps, and downloads the Hand Landmarker model file.
 
 ## Run on Raspberry Pi
 
 ```bash
-cp .env.example .env
+cd ~/Documents/rock-paper-scissors-robot
+git checkout main
+git pull
+
+# First-time setup only
+bash scripts/pi_install.sh
+
+cp -n .env.example .env
 source .venv/bin/activate
 PYTHONPATH=src python -m rps_web.main --host 0.0.0.0 --port 8000
+```
+
+## SSH copy/paste quick start (Raspberry Pi)
+
+Use this exact block in your SSH session:
+
+```bash
+cd ~/Documents/rock-paper-scissors-robot
+git checkout main
+git pull
+bash scripts/pi_install.sh
+cp -n .env.example .env
+source .venv/bin/activate
+PYTHONPATH=src python -m rps_web.main --host 0.0.0.0 --port 8000
+```
+
+If startup fails, run this one-command diagnostics script and paste all output back here:
+
+```bash
+cd ~/Documents/rock-paper-scissors-robot
+bash scripts/pi_debug_run.sh
 ```
 
 ## Access from Windows via SSH tunnel
@@ -102,6 +131,37 @@ You can also view from LAN directly if server binds to `0.0.0.0` and firewall al
 - If camera fails, UI shows *Camera not available* and logs include device tips.
 - Verify webcam exists as `/dev/video0` (or set `OPENCV_DEVICE`).
 - Ensure the model file exists at `MEDIAPIPE_MODEL_PATH`; install script downloads it.
+- Use `MEDIAPIPE_MODEL_PATH` (not `HAND_MODEL_PATH`) if setting the model path manually.
+- If you see this startup error on Raspberry Pi:
+
+  ```
+  OSError: .../mediapipe/tasks/c/libmediapipe.so: undefined symbol: _ZN12carotene_o4t24isSupportedConfigurationEv
+  ```
+
+  do a clean reinstall with system OpenCV dev packages removed (they can conflict with the Python wheel MediaPipe expects). Copy/paste this block:
+
+  ```bash
+  cd ~/Documents/rock-paper-scissors-robot
+  deactivate 2>/dev/null || true
+  rm -rf .venv
+  sudo apt remove -y libopencv-dev
+  sudo apt autoremove -y
+  bash scripts/pi_install.sh
+  source .venv/bin/activate
+  PYTHONPATH=src python -m rps_web.main --host 0.0.0.0 --port 8000
+  ```
+
+- If it still fails, install Python 3.11 and rebuild the virtualenv with it:
+
+  ```bash
+  sudo apt install -y python3.11 python3.11-venv
+  rm -rf .venv
+  python3.11 -m venv .venv
+  source .venv/bin/activate
+  pip install --upgrade pip
+  pip install -r requirements.txt
+  PYTHONPATH=src python -m rps_web.main --host 0.0.0.0 --port 8000
+  ```
 
 ## Development
 
