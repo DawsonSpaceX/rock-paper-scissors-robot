@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rock Paper Scissors Robot</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Rock Paper Scissors Robot</h1>
+      <p class="help">Make a fist and bob your hand down then up to cycle Rock → Paper → Scissors.</p>
+      <div class="layout">
+        <section class="video-panel">
+          <img id="stream" src="/stream" alt="Live camera stream" />
+          <p id="camera-status" class="warn hidden">Camera not available. Check USB webcam and /dev/video0 access.</p>
+        </section>
+        <section class="state-panel">
+          <div class="card"><span>Phase</span><strong id="phase">-</strong></div>
+          <div class="card"><span>Your selection</span><strong id="selection">rock</strong></div>
+          <div class="card"><span>Computer</span><strong id="computer">-</strong></div>
+          <div class="card"><span>Result</span><strong id="result">-</strong></div>
+          <div class="score card">
+            <span>Score</span>
+            <strong>You: <em id="you">0</em> CPU: <em id="cpu">0</em> Ties: <em id="ties">0</em></strong>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
